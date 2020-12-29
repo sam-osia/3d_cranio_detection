@@ -1,16 +1,21 @@
 import binvox_rw as binvox_rw
 import os
-from utils import *
+
 import matplotlib.pyplot as plt
+from scipy.spatial.transform import Rotation as R
+import cv2 as cv
 
+import sys
+sys.path.insert(0, '..')
+from utils.utils import *
 
-set_path('saman')
+set_path()
 
 raw_data_dir = './data/raw'
 processed_data_dir = './data/processed'
 
-display = True
-save = False
+display = False
+save = True
 
 AXIS_SIDE = 0
 AXIS_TOP = 1
@@ -24,11 +29,12 @@ for file_name in os.listdir(raw_data_dir):
     mkdir(target_dir)
 
     data = load_binvox(os.path.join(raw_data_dir, file_name))
-
+    # data = multi_dim_padding(data, (500, 500, 500))
 
     for axis in axes:
         density = get_density(data, axis)
         depth = get_depths(data, axis)
+        cv.imwrite(os.path.join(target_dir, f'test_depth_map_{axis}.png'), depth)
 
         plt.subplot(121), plt.imshow(density, cmap='gray'), plt.title('Density')
         plt.subplot(122), plt.imshow(depth, cmap='gray'), plt.title('Depth')
@@ -39,6 +45,7 @@ for file_name in os.listdir(raw_data_dir):
 
         plt.clf()
 
+    break
     contour = get_contour(data, axis=AXIS_SIDE)
     depth_2d = np.sum(contour, axis=1) / 255.0
     lower_bound = np.min(np.nonzero(depth_2d))
@@ -81,4 +88,4 @@ for file_name in os.listdir(raw_data_dir):
         plt.show()
     plt.clf()
 
-    break
+

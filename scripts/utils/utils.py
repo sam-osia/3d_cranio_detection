@@ -1,14 +1,41 @@
+import sys
+import time
 from pathlib import Path
 import numpy as np
 import os
+from math import sin, cos
 
 from preprocess import binvox_rw
 
 
 # region General Utility Functions
-def set_path(user):
-    if user == 'saman':
-        os.chdir('../..')
+def set_path(user='auto'):
+    if user == 'auto':
+        users = ['saman', 'samosia', 'sayeh']
+        exec_path = (sys.executable).lower()
+        for u in users:
+            if u in exec_path:
+                user = u
+
+    print(f'Setting path for {user}...')
+
+    if user == 'saman':     # saman's personal computer
+        recursive_unix_dir_backtrack('3d_cranio_detection')
+    elif user == 'samosia':   # vector cluster
+        recursive_unix_dir_backtrack('3d_cranio_detection')
+    elif user == 'sayeh':     # sayeh's personal computer
+        raise Exception(f'Path not set for {user}')
+    else:
+        raise Exception('unable to recognize user')
+
+    print(os.getcwd())
+
+
+def recursive_unix_dir_backtrack(desired_dir):
+    dir_name = os.getcwd().split('/')[-1]
+    if dir_name != desired_dir:
+        os.chdir('..')
+        recursive_unix_dir_backtrack(desired_dir)
 
 
 def mkdir(path):
@@ -70,12 +97,11 @@ def get_depths(m, axis, flip=True):
     depth_map[unique_coords.T.tolist()] = unique_depths
 
     # flip the numbers to show closer as higher number
-    # depth_map[depth_map!=0] = 255 - depth_map[depth_map!=0]
+    # depth_map[depth_map != 0] = 255 - depth_map[depth_map != 0]
     return depth_map
 
 
 # endregion
-
 
 # region Numpy Utility Functions
 def moving_average(a, n=3):
@@ -109,6 +135,17 @@ def multi_dim_padding(a: np.array, desired_shape):
 
 # endregion
 
+# region Model utility functions
+def get_log_dir(parent_dir, model_name):
+    run_id = time.strftime(f'{model_name}_%Y_%m_%d-%H_%M_%S')
+    return os.path.join(parent_dir, run_id)
+
+
+def get_save_dir(parent_dir, model_name):
+    run_id = time.strftime(f'{model_name}_%Y_%m_%d-%H_%M_%S.h5')
+    return os.path.join(parent_dir, run_id)
+
+# endregion
 
 if __name__ == '__main__':
     a = np.arange(1, 9)
