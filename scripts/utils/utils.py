@@ -11,11 +11,7 @@ from preprocess import binvox_rw
 # region General Utility Functions
 def set_path(user='auto'):
     if user == 'auto':
-        users = ['saman', 'samosia', 'sayeh']
-        exec_path = (sys.executable).lower()
-        for u in users:
-            if u in exec_path:
-                user = u
+        user = detect_user()
 
     print(f'Setting path for {user}...')
 
@@ -38,8 +34,27 @@ def recursive_unix_dir_backtrack(desired_dir):
         recursive_unix_dir_backtrack(desired_dir)
 
 
+def detect_user():
+    users = ['saman', 'samosia', 'sayeh']
+    exec_path = (sys.executable).lower()
+    user = None
+    for u in users:
+        if u in exec_path:
+            user = u
+
+    if user is None:
+        raise Exception('unable to detect user')
+    return user
+
 def mkdir(path):
     Path(path).mkdir(parents=True, exist_ok=True)
+
+
+def overrides(interface_class):
+    def overrider(method):
+        assert(method.__name__ in dir(interface_class))
+        return method
+    return overrider
 
 
 def load_binvox(path):
@@ -97,9 +112,10 @@ def get_depths(m, axis, flip=True):
     depth_map[unique_coords.T.tolist()] = unique_depths
 
     # flip the numbers to show closer as higher number
+    # TODO: need to apply the line below on a mask that doesn't contain the contour of the image, otherwise points
+    #  within the person with a value of 0 don't get flipped
     # depth_map[depth_map != 0] = 255 - depth_map[depth_map != 0]
     return depth_map
-
 
 # endregion
 
@@ -110,13 +126,12 @@ def moving_average(a, n=3):
     return ret[n - 1:] / n
 
 
-def pad_with(vector, pad_width, iaxis, kwargs):
-    pad_value = kwargs.get('padder', 0)
-    vector[:pad_width[0]] = pad_value
-    vector[-pad_width[1]:] = pad_value
-
-
 def multi_dim_padding(a: np.array, desired_shape):
+    def pad_with(vector, pad_width, iaxis, kwargs):
+        pad_value = kwargs.get('padder', 0)
+        vector[:pad_width[0]] = pad_value
+        vector[-pad_width[1]:] = pad_value
+
     if len(a.shape) != len(desired_shape):
         raise Exception('Please make sure the array and desired shape are of the same rank!')
 
@@ -150,6 +165,5 @@ def get_save_dir(parent_dir, model_name):
 if __name__ == '__main__':
     a = np.arange(1, 9)
     a = a.reshape((2, 2, 2))
-    print(np.pad(a, [(1, 2), (3, 4), (5, 6)], pad_with))
 
     print(multi_dim_padding(a, (4, 4, 4)))

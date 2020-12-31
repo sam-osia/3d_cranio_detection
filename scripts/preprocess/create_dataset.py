@@ -45,7 +45,6 @@ for file_name in os.listdir(raw_data_dir):
 
         plt.clf()
 
-    break
     contour = get_contour(data, axis=AXIS_SIDE)
     depth_2d = np.sum(contour, axis=1) / 255.0
     lower_bound = np.min(np.nonzero(depth_2d))

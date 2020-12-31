@@ -22,8 +22,8 @@ class Voxel3DModel(BaseModel):
                  hyperparams=None,
                  test_run=True):
 
-        model_architecture = 'Voxel 3D'
-        model_name = 'MNIST test'
+        model_architecture = 'Voxel_3D'
+        model_name = 'MNIST'
 
         super(Voxel3DModel, self).__init__(model_architecture, model_name, model_tag,
                                            run_id, data_path,
@@ -48,7 +48,6 @@ class Voxel3DModel(BaseModel):
                       metrics=['accuracy'])
 
         print(model.summary())
-
         return model
 
     def load_data(self, **kwargs):

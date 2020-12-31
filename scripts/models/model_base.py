@@ -21,13 +21,24 @@ class BaseModel(metaclass=ABCMeta):
         self.model_architecture = model_architecture
         self.model_name = model_name
 
+        if test_run is False:
+            assert run_id is not None
+
         self.run_id = run_id
         self.data_path = data_path
-        self.model_tag = model_tag
+
+        if test_run:
+            if model_tag is None:
+                self.model_tag = 'Test'
+            else:
+                self.model_tag = model_tag
+        else:
+            self.model_tag = f'run_{run_id}'
 
         self.model_dir = f'./results/{self.model_architecture}/{self.model_name}'
         self.hyperparams_dir = os.path.join(self.model_dir, 'hyperparameters')
-        self.weights_dir = os.path.join(self.model_dir, 'model_weights')
+        self.run_name = time.strftime(f'{self.model_architecture}_{self.model_name}_{self.model_tag}_%Y_%m_%d-%H_%M_%S')
+        self.run_dir = os.path.join(self.model_dir, self.run_name)
 
         if generate_hyperparams:
             self.generate_hyperparams(hyperparams_range)
@@ -39,7 +50,7 @@ class BaseModel(metaclass=ABCMeta):
 
         mkdir(self.model_dir)
         mkdir(self.hyperparams_dir)
-        mkdir(self.weights_dir)
+        mkdir(self.run_dir)
 
     def generate_hyperparams(self, hyperparams_range, num_trials):
         keys, vals = zip(*hyperparams_range.items())
@@ -76,15 +87,17 @@ class BaseModel(metaclass=ABCMeta):
 
         model = self.create_model(**self.hyperparams)
 
-        logdir = get_log_dir(f'{self.model_dir}/tb_logs', self.model_architecture + f'_{self.model_tag}')
-        savedir = get_save_dir(f'{self.model_dir}/model_weights', self.model_architecture + f'_{self.model_tag}')
+        logdir = get_log_dir(f'{self.model_dir}/tb_logs',
+                             f'{self.model_architecture}_{self.model_name}_{self.model_tag}')
+
+        savedir = get_save_dir(f'{self.run_dir}', self.run_name)
 
         early_stopping_cb = keras.callbacks.EarlyStopping(patience=5, restore_best_weights=True)
         tensorboard_cb = keras.callbacks.TensorBoard(logdir)
 
         model.fit(x_train, y_train,
                   validation_data=(x_valid, y_valid),
-                  epochs=1000,
+                  epochs=2,
                   callbacks=[early_stopping_cb, tensorboard_cb],
                   validation_split=0.2)
 
