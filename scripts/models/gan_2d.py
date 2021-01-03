@@ -1,9 +1,6 @@
-import time
-
 import tensorflow as tf
 import tensorflow.keras as keras
 
-from tensorflow.keras import Sequential
 from tensorflow.keras.layers import BatchNormalization, LeakyReLU, \
     Reshape, Conv2D, Conv2DTranspose, Dropout, Dense, Flatten
 

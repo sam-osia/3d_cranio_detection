@@ -1,24 +1,32 @@
 #!/bin/bash
 
-dirname=$1
-abs_dirname=$(cd "$(dirname "$1")"; pwd)/$(basename "$1")
-echo hello
-echo $dirname
-echo $abs_dirname
 
+# configure all the slurm stuff:
+#SBATCH --job-name=test_job
+#SBATCH --output=/h/samosia/Git/endomondo_analysis/logs/test_logs/output-%N-%j.out
+#SBATCH --error=/h/samosia/Git/endomondo_analysis/logs/test_logs/error-%N-%j.out
+#SBATCH --open-mode=append
+#SBATCH --partition=gpu
+#SBATCH --ntasks=4
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=32G
+#SBATCH --gres=gpu:1
+#SBATCH --nodes=1
 
-## configure all the slurm stuff:
-##SBATCH --job-name=test_job
-##SBATCH --output=/h/samosia/Git/endomondo_analysis/logs/test_logs/output-%N-%j.out
-##SBATCH --error=/h/samosia/Git/endomondo_analysis/logs/test_logs/error-%N-%j.out
-##SBATCH --open-mode=append
-##SBATCH --partition=gpu
-##SBATCH --ntasks=4
-##SBATCH --cpus-per-task=4
-##SBATCH --mem=32G
-##SBATCH --gres=gpu:1
-##SBATCH --nodes=1
+echo arg1:
+echo $1
+echo arg2:
+echo $2
+echo end
 #
+#script_dir=$1
+#script_dir=$(cd "$(dirname "$1")"; pwd)/$(basename "$1")
+#commands=$2
+#echo hello
+#echo $script_dir
+#echo $commands
+
+
 ## activate project virtualenv
 #source /h/samosia/python_envs/tf2/bin/activate
 #

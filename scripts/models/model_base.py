@@ -2,6 +2,7 @@ from abc import ABCMeta, abstractmethod
 import itertools
 import random
 import json
+from subprocess import call
 
 import tensorflow as tf
 import tensorflow.keras as keras
@@ -12,59 +13,54 @@ from utils.utils import *
 
 
 class BaseModel(metaclass=ABCMeta):
-    def __init__(self, model_architecture, model_name, model_tag=None,
-                 run_id=None, data_path=None,
-                 hyperparams_range=None, generate_hyperparams=False,
-                 hyperparams=None,
-                 test_run=True):
+    def __init__(self, model_architecture, model_name, tag=None,
+                 run_id=None,
+                 hyperparams_range=None,
+                 hyperparams=None):
 
         self.model_architecture = model_architecture
         self.model_name = model_name
 
-        if test_run is False:
-            assert run_id is not None
-
         self.run_id = run_id
-        self.data_path = data_path
 
-        if test_run:
-            if model_tag is None:
-                self.model_tag = 'Test'
-            else:
-                self.model_tag = model_tag
+        if self.run_id is None:
+            tag_ext = 'test'
         else:
-            self.model_tag = f'run_{run_id}'
+            tag_ext = f'run_{run_id}'
+
+        if tag is None:
+            self.tag = tag_ext
+        else:
+            self.tag = f'{tag}_{tag_ext}'
 
         self.model_dir = f'./results/{self.model_architecture}/{self.model_name}'
         self.hyperparams_dir = os.path.join(self.model_dir, 'hyperparameters')
-        self.run_name = time.strftime(f'{self.model_architecture}_{self.model_name}_{self.model_tag}_%Y_%m_%d-%H_%M_%S')
+        self.log_dir = os.path.join(self.model_dir, 'logs')
+        self.run_name = time.strftime(f'{self.model_architecture}_{self.model_name}_{self.tag}_%Y_%m_%d-%H_%M_%S')
         self.run_dir = os.path.join(self.model_dir, self.run_name)
 
-        if generate_hyperparams:
-            self.generate_hyperparams(hyperparams_range)
-
-        if test_run:
+        if self.run_id is None:
             self.hyperparams = hyperparams
         else:
-            self.hyperparams = self.parse_hyperparams()
+            self.hyperparams = self.generate_hyperparams(hyperparams_range)
 
         mkdir(self.model_dir)
+        mkdir(self.log_dir)
         mkdir(self.hyperparams_dir)
         mkdir(self.run_dir)
 
-    def generate_hyperparams(self, hyperparams_range, num_trials):
+        self.save_hyperparams(self.hyperparams)
+
+    def generate_hyperparams(self, hyperparams_range):
         keys, vals = zip(*hyperparams_range.items())
         trials = [dict(zip(keys, v)) for v in itertools.product(*vals)]
+        hyperparams = random.sample(trials, 1)[0]
 
-        trial_params = random.sample(trials, num_trials)
+        return hyperparams
 
-        params_dir = os.path.join(self.model_dir, 'hyperparameters')
-        mkdir(params_dir)
-
-        for i, trial_param in enumerate(trial_params):
-            with open(os.path.join(params_dir, f'run{i}.json'), 'w') as f:
-                json.dump(trial_param, f)
-        return
+    def save_hyperparams(self, hyperparams):
+        with open(os.path.join(self.run_dir, f'hyperparams.json'), 'w') as f:
+            json.dump(hyperparams, f)
 
     def parse_hyperparams(self):
         hyperparams = json.loads(os.path.join(self.hyperparams_dir, f'run{self.run_id}.json'))
@@ -88,9 +84,9 @@ class BaseModel(metaclass=ABCMeta):
         model = self.create_model(**self.hyperparams)
 
         logdir = get_log_dir(f'{self.model_dir}/tb_logs',
-                             f'{self.model_architecture}_{self.model_name}_{self.model_tag}')
+                             f'{self.model_architecture}_{self.model_name}_{self.tag}')
 
-        savedir = get_save_dir(f'{self.run_dir}', self.run_name)
+        savedir = get_save_dir(f'{self.run_dir}', 'weights')
 
         early_stopping_cb = keras.callbacks.EarlyStopping(patience=5, restore_best_weights=True)
         tensorboard_cb = keras.callbacks.TensorBoard(logdir)
@@ -101,8 +97,12 @@ class BaseModel(metaclass=ABCMeta):
                   callbacks=[early_stopping_cb, tensorboard_cb],
                   validation_split=0.2)
 
-        print(savedir)
+        print(model.evaluate(x_valid, y_valid))
+
         model.save(savedir)
+
+    def submit_job(self):
+        pass
 
 
 if __name__ == '__main__':

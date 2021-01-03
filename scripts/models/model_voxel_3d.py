@@ -1,37 +1,44 @@
-import h5py
+import sys
+sys.path.insert(0, '..')
+from utils.utils import *
+
 import tensorflow as tf
 import tensorflow.keras as keras
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Input, Dense, Flatten, Conv3D, MaxPooling3D, Dropout
 from tensorflow.keras.utils import to_categorical
 import h5py
-import numpy as np
-import matplotlib.pyplot as plt
 
 from model_base import BaseModel
-
-import sys
-sys.path.insert(0, '..')
-from utils.utils import *
+import argparse
 
 
 class Voxel3DModel(BaseModel):
-    def __init__(self, model_tag=None,
-                 run_id=None, data_path=None,
-                 hyperparams_range=None, generate_hyperparams=False,
-                 hyperparams=None,
-                 test_run=True):
+    def __init__(self, tag=None, run_id=None):
 
         model_architecture = 'Voxel_3D'
         model_name = 'MNIST'
 
-        super(Voxel3DModel, self).__init__(model_architecture, model_name, model_tag,
-                                           run_id, data_path,
-                                           hyperparams_range, generate_hyperparams,
-                                           hyperparams,
-                                           test_run)
+        hyperparams_range = {
+            'n_conv_layers': [2, 3],
+            'dropout': [0, 0.25, 0.5],
+        }
 
-    def create_model(self, n_conv_layers, dropout, n_class) -> keras.models.Model:
+        test_hyperparams = {
+            'n_conv_layers': 2,
+            'dropout': 0.4,
+        }
+
+        hyperparams = None
+        if run_id is None:
+            hyperparams = test_hyperparams
+
+        super(Voxel3DModel, self).__init__(model_architecture, model_name, tag,
+                                           run_id,
+                                           hyperparams_range,
+                                           hyperparams)
+
+    def create_model(self, n_conv_layers, dropout) -> keras.models.Model:
         model = Sequential()
         model.add(Input(shape=(16, 16, 16, 1)))
         for i in range(n_conv_layers):
@@ -41,7 +48,7 @@ class Voxel3DModel(BaseModel):
 
         model.add(Flatten())
         model.add(Dense(256, activation='relu', kernel_initializer='he_uniform'))
-        model.add(Dense(n_class, activation='softmax'))
+        model.add(Dense(10, activation='softmax'))
 
         model.compile(optimizer='adam',
                       loss='categorical_crossentropy',
@@ -69,15 +76,18 @@ class Voxel3DModel(BaseModel):
         return x_train, y_train, x_test, y_test
 
 
+def create_model(args):
+    print('hello')
+    model = Voxel3DModel(**vars(args))
+    return model
+
+
 if __name__ == '__main__':
     set_path()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-R', '--run_id', default=None)
+    parser.add_argument('-T', '--tag', default=None)
 
-    hyperparams = {
-        'n_conv_layers': 2,
-        'dropout': 0.4,
-        'n_class': 10
-    }
-
-    model = Voxel3DModel(test_run=True, hyperparams=hyperparams)
-
+    args = parser.parse_args()
+    model = create_model(args)
     model.run_pipeline()

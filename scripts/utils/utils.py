@@ -156,9 +156,8 @@ def get_log_dir(parent_dir, model_name):
     return os.path.join(parent_dir, run_id)
 
 
-def get_save_dir(parent_dir, model_name):
-    run_id = time.strftime(f'{model_name}_%Y_%m_%d-%H_%M_%S.h5')
-    return os.path.join(parent_dir, run_id)
+def get_save_dir(parent_dir, run_name):
+    return os.path.join(parent_dir, run_name + '.h5')
 
 # endregion
 
