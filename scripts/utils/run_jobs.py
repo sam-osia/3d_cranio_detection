@@ -10,7 +10,7 @@ parser.add_argument('-T', '--tag', default=None)
 inputs = parser.parse_args()
 
 for i in range(1, int(inputs.runs) + 1):
-    command = f'./submit_script.sh'
+    command = f'./submit_script.slrm'
     args = f'--script {inputs.script} --run_id {i}'
     if inputs.tag is not None:
         args = f'{args} --tag {inputs.tag}'
