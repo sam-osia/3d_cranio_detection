@@ -9,11 +9,11 @@ parser.add_argument('-T', '--tag', default=None)
 
 inputs = parser.parse_args()
 
-for i in range(int(inputs.runs)):
-    command = f'./submit_script.sh {inputs.script}'
-    args = f'--run_id {i}'
+for i in range(1, int(inputs.runs) + 1):
+    command = f'./submit_script.sh'
+    args = f'--script {inputs.script} --run_id {i}'
     if inputs.tag is not None:
         args = f'{args} --tag {inputs.tag}'
-    print(f'{command} "{args}"')
-    call(f'{command} "{args}"', shell=True)
+    print(f'{command} {args}')
+    call(f'{command} {args}', shell=True)
     print()
