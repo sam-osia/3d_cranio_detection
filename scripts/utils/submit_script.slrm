@@ -55,14 +55,14 @@ echo "RUN_ID: ${RUN_ID}"
 echo "TAG: ${TAG}"
 
 
-## activate project virtualenv
-#source /h/samosia/Git/3d_cranio_detection/venv/bin/activate
-#
-## setup environmental variables to point to the correct CUDA build
-#export PATH=/pkgs/cuda-10.1/bin${PATH:+:${PATH}}
-#export LD_LIBRARY_PATH=/pkgs/cuda-10.1/lib64:/pkgs/cudnn-10.1-v7.6.3.30/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-#
-## run the script
-#echo "python $script_dir $commands >> /h/samosia/Git/3d_cranio_detection/cluster_logs/$commands.log"
-#
-#deactivate
+# activate project virtualenv
+source /h/samosia/Git/3d_cranio_detection/venv/bin/activate
+
+# setup environmental variables to point to the correct CUDA build
+export PATH=/pkgs/cuda-10.1/bin${PATH:+:${PATH}}
+export LD_LIBRARY_PATH=/pkgs/cuda-10.1/lib64:/pkgs/cudnn-10.1-v7.6.3.30/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+
+# run the script
+python $script_dir $commands >> /h/samosia/Git/3d_cranio_detection/cluster_logs/$commands.log
+
+deactivate
