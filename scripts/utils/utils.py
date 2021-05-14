@@ -19,8 +19,6 @@ def set_path(user='auto'):
         recursive_unix_dir_backtrack('3d_cranio_detection')
     elif user == 'samosia':   # vector cluster
         recursive_unix_dir_backtrack('3d_cranio_detection')
-    elif user == 'sayeh':     # sayeh's personal computer
-        raise Exception(f'Path not set for {user}')
     else:
         raise Exception('unable to recognize user')
 
@@ -35,8 +33,8 @@ def recursive_unix_dir_backtrack(desired_dir):
 
 
 def detect_user():
-    users = ['saman', 'samosia', 'sayeh']
-    exec_path = (sys.executable).lower()
+    users = ['saman', 'samosia']
+    exec_path = sys.executable.lower()
     user = None
     for u in users:
         if u in exec_path:
@@ -45,6 +43,7 @@ def detect_user():
     if user is None:
         raise Exception('unable to detect user')
     return user
+
 
 def mkdir(path):
     Path(path).mkdir(parents=True, exist_ok=True)
@@ -119,6 +118,7 @@ def get_depths(m, axis, flip=True):
 
 # endregion
 
+
 # region Numpy Utility Functions
 def moving_average(a, n=3):
     ret = np.cumsum(a, dtype=float)
@@ -150,6 +150,7 @@ def multi_dim_padding(a: np.array, desired_shape):
 
 # endregion
 
+
 # region Model utility functions
 def get_log_dir(parent_dir, model_name):
     run_id = time.strftime(f'{model_name}_%Y_%m_%d-%H_%M_%S')
@@ -160,6 +161,7 @@ def get_save_dir(parent_dir, run_name):
     return os.path.join(parent_dir, run_name + '.h5')
 
 # endregion
+
 
 if __name__ == '__main__':
     a = np.arange(1, 9)

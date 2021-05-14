@@ -34,7 +34,6 @@ class BaseModel(metaclass=ABCMeta):
             self.tag = f'{tag}_{tag_ext}'
 
         self.model_dir = f'./results/{self.model_architecture}/{self.model_name}'
-        self.hyperparams_dir = os.path.join(self.model_dir, 'hyperparameters')
         self.log_dir = os.path.join(self.model_dir, 'logs')
         self.run_name = time.strftime(f'{self.model_architecture}_{self.model_name}_{self.tag}_%Y_%m_%d-%H_%M_%S')
         self.run_dir = os.path.join(self.model_dir, self.run_name)
@@ -46,7 +45,6 @@ class BaseModel(metaclass=ABCMeta):
 
         mkdir(self.model_dir)
         mkdir(self.log_dir)
-        mkdir(self.hyperparams_dir)
         mkdir(self.run_dir)
 
         self.save_hyperparams(self.hyperparams)
@@ -63,7 +61,7 @@ class BaseModel(metaclass=ABCMeta):
             json.dump(hyperparams, f)
 
     def parse_hyperparams(self):
-        hyperparams = json.loads(os.path.join(self.hyperparams_dir, f'run{self.run_id}.json'))
+        hyperparams = json.loads(os.path.join(self.run_dir, 'hyperparams.json'))
         return hyperparams
 
     @abstractmethod

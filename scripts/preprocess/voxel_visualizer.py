@@ -11,8 +11,8 @@ from utils.utils import *
 
 set_path()
 
-raw_data_dir = './data/raw'
-processed_data_dir = './data/processed'
+raw_data_dir = './data/raw/3dmd_voxels'
+processed_data_dir = './data/processed/voxel'
 
 display = False
 save = True
@@ -24,6 +24,9 @@ AXIS_FRONT = 2
 axes = [AXIS_SIDE, AXIS_TOP, AXIS_FRONT]
 
 for file_name in os.listdir(raw_data_dir):
+    if 'cap' not in file_name:
+        continue
+
     print('Processing file:', file_name)
     target_dir = os.path.join(processed_data_dir, file_name.split('.')[0])
     mkdir(target_dir)
@@ -77,14 +80,14 @@ for file_name in os.listdir(raw_data_dir):
 
     data_top_side_front_cut = data_top_side_cut[cutoff_left:cutoff_right, :, :]
 
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
-    ax.voxels(data_top_side_front_cut)
-
-    if save:
-        plt.savefig(os.path.join(target_dir, '3d_plot.png'))
-    if display:
-        plt.show()
-    plt.clf()
+    # fig = plt.figure()
+    # ax = fig.gca(projection='3d')
+    # ax.voxels(data_top_side_front_cut)
+    #
+    # if save:
+    #     plt.savefig(os.path.join(target_dir, '3d_plot.png'))
+    # if display:
+    #     plt.show()
+    # plt.clf()
 
 

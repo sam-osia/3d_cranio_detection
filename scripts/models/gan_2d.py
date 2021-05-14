@@ -21,6 +21,7 @@ def make_generator_model():
     assert model.output_shape == (None, 7, 7, 256)  # Note: None is the batch size
 
     model.add(Conv2DTranspose(128, (5, 5), strides=(1, 1), padding='same', use_bias=False))
+
     assert model.output_shape == (None, 7, 7, 128)
     model.add(BatchNormalization())
     model.add(LeakyReLU())
