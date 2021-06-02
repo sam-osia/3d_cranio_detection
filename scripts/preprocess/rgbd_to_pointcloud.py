@@ -28,9 +28,9 @@ intrinsic = o3d.camera.PinholeCameraIntrinsic()
 intrinsic.set_intrinsics(640, 480, 543.5394, 543.7316, 316.1122, 240.54805)
 
 
-parent_dir = './data/examples/rgbd-scenes/s_run_104/'
+parent_dir = './data/raw/rgbd/s_run_104'
 
-voxel_size = 0.006
+voxel_size = 0.005
 
 prev_trans = [[0.862, 0.011, -0.507, 0.0], [-0.139, 0.967, -0.215, 0.2],
          [0.487, 0.255, 0.835, -0.4], [0.0, 0.0, 0.0, 1.0]]
@@ -59,8 +59,6 @@ for i in range(2, 261):
     icp_iteration = 100
     save_image = False
 
-    # time.sleep(1)
-
     for i in range(icp_iteration):
         reg_p2l = o3d.pipelines.registration.registration_icp(
             source, target, threshold, np.identity(4),
@@ -83,9 +81,8 @@ for i in range(2, 261):
     # vis.destroy_window()
     break
 
-
-
 exit()
+
 
 for i in range(2, 263):
     source = o3d.io.read_point_cloud(os.path.join(parent_dir, f'pcd_{i - 1}.pcd'))

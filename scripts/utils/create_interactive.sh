@@ -1,0 +1,1 @@
+qsub -I -q gpu -l nodes=1:ppn=16:gpus=1,mem=170gb,vmem=170gb,walltime=240:00:00

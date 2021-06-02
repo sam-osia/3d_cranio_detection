@@ -1,0 +1,10 @@
+CUDA PATHS
+/hpf/tools/centos7/tensorflow
+/hpf/tools/centos6/tensorflow
+
+module list
+module purge
+module unload tensorflow/2.2.0-py385-gpu
+module load tensorflow/2.2.0-py385-gpu
+
+qlogin --> pip install whatever --user

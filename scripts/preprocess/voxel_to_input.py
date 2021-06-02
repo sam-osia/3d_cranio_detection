@@ -84,7 +84,7 @@ raw_data_parent = './data/raw/3dmd_voxels'
 processed_data_parent = './data/processed/voxel'
 
 for file_name in os.listdir(raw_data_parent):
-    if 'cap' not in file_name:
+    if 'white_with_cap' not in file_name:
         continue
 
     processed_data_dir = os.path.join(processed_data_parent, file_name.split('.')[0])

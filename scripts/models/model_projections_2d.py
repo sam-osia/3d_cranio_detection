@@ -14,6 +14,7 @@ import h5py
 from model_base import BaseModel
 import argparse
 import random
+import imutils
 
 import matplotlib.pyplot as plt
 
@@ -49,7 +50,7 @@ class Projection2DModel(BaseModel):
             input = Input(shape=(128, 128, 1))
             layer = Conv2D(8, kernel_size=5, strides=2, activation='relu')(input)
             layer = BatchNormalization()(layer)
-            layer = Conv2D(16, kernel_size=3, strides=1, activation='relu')(input)
+            layer = Conv2D(16, kernel_size=3, strides=1, activation='relu')(layer)
             layer = BatchNormalization()(layer)
             layer = Conv2D(32, kernel_size=3, strides=1, activation='relu')(layer)
             layer = BatchNormalization()(layer)
@@ -122,10 +123,12 @@ def run_model_top_view():
     model = Projection2DModel(tag='playing_around').create_model(num_angles=1)
     model.load_weights('./results/Projection_2D/Pouria/3D_CNN_collapsed_top_view.h5')
 
-    depth_files = ['./data/processed/voxel/black_no_cap/depths.npy',
-                   './data/processed/voxel/black_with_cap/depths.npy',
-                   './data/processed/voxel/white_no_cap/depths.npy',
-                   './data/processed/voxel/white_with_cap/depths.npy']
+    # depth_files = ['./data/processed/voxel/black_no_cap/depths.npy',
+    #                './data/processed/voxel/black_with_cap/depths.npy',
+    #                './data/processed/voxel/white_no_cap/depths.npy',
+    #                './data/processed/voxel/white_with_cap/depths.npy']
+
+    depth_files = ['./data/processed/voxel/white_with_cap/depths.npy']
 
     # depth_files = ['./data/processed/rgbd/s_1_top/depths.npy']
 
@@ -161,7 +164,6 @@ def run_model_top_back_view():
     print(result)
 
 
-
 if __name__ == '__main__':
     set_path()
     parser = argparse.ArgumentParser()
@@ -172,5 +174,6 @@ if __name__ == '__main__':
     # model = create_model(args)
     # model.run_pipeline()
 
-    run_model_top_back_view()
+    # run_model_top_back_view()
+    run_model_top_view()
 
