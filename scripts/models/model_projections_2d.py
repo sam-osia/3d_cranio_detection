@@ -119,18 +119,16 @@ def create_model(args):
     return model
 
 
-def run_model_top_view():
+def run_model_top_view(filename, source):
     model = Projection2DModel(tag='playing_around').create_model(num_angles=1)
     model.load_weights('./results/Projection_2D/Pouria/3D_CNN_collapsed_top_view.h5')
 
-    # depth_files = ['./data/processed/voxel/black_no_cap/depths.npy',
-    #                './data/processed/voxel/black_with_cap/depths.npy',
-    #                './data/processed/voxel/white_no_cap/depths.npy',
-    #                './data/processed/voxel/white_with_cap/depths.npy']
+    if source == '3dmd':
+        filepath = os.path.join('./data/processed/voxel', filename, 'depths.npy')
+    elif source == 'android':
+        filepath = os.path.join('./data/processed/rgbd', filename, 'depths.npy')
 
-    depth_files = ['./data/processed/voxel/white_with_cap/depths.npy']
-
-    # depth_files = ['./data/processed/rgbd/s_1_top/depths.npy']
+    depth_files = [filepath]
 
     depths_raw = []
 
@@ -167,13 +165,23 @@ def run_model_top_back_view():
 if __name__ == '__main__':
     set_path()
     parser = argparse.ArgumentParser()
+    parser.add_argument('-M', '--mode', default='predict')
+    parser.add_argument('-S', '--source', default='3dmd')
+    parser.add_argument('-F', '--filename', default=None)
     parser.add_argument('-R', '--run_id', default=None)
     parser.add_argument('-T', '--tag', default=None)
 
-    # args = parser.parse_args()
+    args = parser.parse_args()
+
+    if args.mode == 'predict':
+        run_model_top_view(args.filename, args.source)
+
+    elif args.mode == 'train':
+        pass
+
     # model = create_model(args)
     # model.run_pipeline()
 
     # run_model_top_back_view()
-    run_model_top_view()
+
 

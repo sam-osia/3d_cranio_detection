@@ -118,7 +118,6 @@ def get_depths(m, axis, flip=True):
 
 # endregion
 
-
 # region Numpy Utility Functions
 def moving_average(a, n=3):
     ret = np.cumsum(a, dtype=float)
@@ -150,7 +149,6 @@ def multi_dim_padding(a: np.array, desired_shape):
 
 # endregion
 
-
 # region Model utility functions
 def get_log_dir(parent_dir, model_name):
     run_id = time.strftime(f'{model_name}_%Y_%m_%d-%H_%M_%S')
@@ -161,6 +159,55 @@ def get_save_dir(parent_dir, run_name):
     return os.path.join(parent_dir, run_name + '.h5')
 
 # endregion
+
+# region Database Filtering
+def drop_post_op_patients(data_im, data_si, target):
+    #indices = np.where(data_si[:, 4] == '0')[0]
+    indices = np.where((data_si[:, 4].astype(int) == 0) & (data_si[:, -2].astype(int) != 8))[0]
+
+    print("Dropping " + str(len(indices)) + " images out of " + str(len(data_si)))
+    data_im = np.delete(data_im, indices, axis=0)
+    data_si = np.delete(data_si, indices, axis=0)
+    target = np.delete(target, indices, axis=0)
+    return data_im, data_si, target
+
+
+def drop_patients_above_age(data_im, data_si, target, age=2):
+    indices = np.where((data_si[:, 6].astype(int) - data_si[:, 5].astype(int)) > age)[0]
+
+    print("Dropping " + str(len(indices)) + " images out of " + str(len(data_si)))
+    data_im = np.delete(data_im, indices, axis=0)
+    data_si = np.delete(data_si, indices, axis=0)
+    target = np.delete(target, indices, axis=0)
+    return data_im, data_si, target
+
+
+def remove_images(data_im, data_si, target, path='/hpf/largeprojects/ccm/devin/cts/analysis/scripts/3D/images_to_remove.txt'):
+    images_to_remove = open(path).readlines()
+    images_to_remove = [line.rstrip() for line in images_to_remove]
+
+    indices = np.array([np.where(data_si[:, 2] == i)[0].tolist()[0] for i in images_to_remove if np.where(data_si[:, 2] == i)[0].tolist() != []])
+    # indices = (list(i for i in range(data_si.shape[0]) if data_si[i, 2] in images_to_remove))
+    # print(indices)
+
+    print('image files')
+    print(data_si[:, 2])
+
+    print('images to remove:')
+    print(images_to_remove)
+
+    diagnoses = data_si[indices, -2]
+    va_unique, va_counts = np.unique(diagnoses, return_counts=True)
+
+    print("Dropping " + str(len(indices)) + " images out of " + str(len(data_si)) + ", with distribution: ")
+    print("    " + str(dict(zip(va_unique, va_counts))))
+    data_im = np.delete(data_im, indices, axis=0)
+    data_si = np.delete(data_si, indices, axis=0)
+    target = np.delete(target, indices, axis=0)
+
+    return data_im, data_si, target
+# endregion
+
 
 
 if __name__ == '__main__':

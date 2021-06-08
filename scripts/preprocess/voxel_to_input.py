@@ -80,19 +80,55 @@ def normalize_depths(depth_map, invert=False):
     return depth_map
 
 
-raw_data_parent = './data/raw/3dmd_voxels'
-processed_data_parent = './data/processed/voxel'
+def run_batch_depths():
+    raw_data_parent = './data/raw/3dmd_voxels'
+    processed_data_parent = './data/processed/voxel'
 
-for file_name in os.listdir(raw_data_parent):
-    if 'white_with_cap' not in file_name:
-        continue
+    for file_name in os.listdir(raw_data_parent):
+        if 'white_with_cap' not in file_name:
+            continue
+
+        processed_data_dir = os.path.join(processed_data_parent, file_name.split('.')[0])
+        mkdir(processed_data_dir)
+
+        data = load_binvox(os.path.join(raw_data_parent, file_name))
+
+        density = np.sum(data[:, 175:, :], axis=1)
+
+        h_lower, h_upper = find_bounds(density, search_axis=0)
+        v_lower, v_upper = find_bounds(density, search_axis=1)
+        depth_trimmed = density[h_lower:h_upper, v_lower:v_upper]
+        depth_padded = pad_to_square(depth_trimmed, extra_padding=0)
+        depth_normalized = normalize_depths(depth_padded, invert=False)
+        depth_resized = cv2.resize(depth_normalized, dsize=(128, 128), interpolation=cv2.INTER_LINEAR)
+
+        np.save(os.path.join(processed_data_dir, 'depths'), depth_resized)
+
+        plt.suptitle(file_name)
+
+        plt.subplot(231), plt.imshow(density), plt.title('find bounds')
+        plt.hlines(h_lower, 0, density.shape[1] - 1, colors='red')
+        plt.hlines(h_upper, 0, density.shape[1] - 1, colors='red')
+        plt.vlines(v_lower, 0, density.shape[0] - 1, colors='red')
+        plt.vlines(v_upper, 0, density.shape[0] - 1, colors='red')
+
+        plt.subplot(232), plt.imshow(depth_trimmed), plt.title('trim to edge')
+        plt.subplot(233), plt.imshow(depth_padded), plt.title('pad to square')
+        plt.subplot(234), plt.imshow(depth_normalized), plt.title('normalize depths')
+        plt.subplot(235), plt.imshow(depth_resized), plt.title('resize to 128x128')
+
+        plt.show()
+
+def run_single_depths(file_name):
+    raw_data_parent = './data/raw/3dmd_voxels'
+    processed_data_parent = './data/preprocessed/voxel'
 
     processed_data_dir = os.path.join(processed_data_parent, file_name.split('.')[0])
     mkdir(processed_data_dir)
 
     data = load_binvox(os.path.join(raw_data_parent, file_name))
 
-    density = np.sum(data[:, 175:, :], axis=1)
+    density = np.sum(data[:, 128:, :], axis=1)
 
     h_lower, h_upper = find_bounds(density, search_axis=0)
     v_lower, v_upper = find_bounds(density, search_axis=1)
@@ -117,5 +153,48 @@ for file_name in os.listdir(raw_data_parent):
     plt.subplot(235), plt.imshow(depth_resized), plt.title('resize to 128x128')
 
     plt.show()
+    time.sleep(3)
+    plt.close()
 
+
+def run_single_density(file_name):
+    raw_data_parent = './data/raw/3dmd_voxels'
+    processed_data_parent = './data/preprocessed/voxel'
+
+    processed_data_dir = os.path.join(processed_data_parent, file_name.split('.')[0])
+    mkdir(processed_data_dir)
+
+    data = load_binvox(os.path.join(raw_data_parent, file_name))
+
+    density = np.sum(data[:, 128:, :], axis=1)
+
+    h_lower, h_upper = find_bounds(density, search_axis=0)
+    v_lower, v_upper = find_bounds(density, search_axis=1)
+    depth_trimmed = density[h_lower:h_upper, v_lower:v_upper]
+    depth_padded = pad_to_square(depth_trimmed, extra_padding=0)
+    depth_normalized = normalize_depths(depth_padded, invert=False)
+    depth_resized = cv2.resize(depth_normalized, dsize=(128, 128), interpolation=cv2.INTER_LINEAR)
+
+    np.save(os.path.join(processed_data_dir, 'depths'), depth_resized)
+
+    plt.suptitle(file_name)
+
+    plt.subplot(231), plt.imshow(density), plt.title('find bounds')
+    plt.hlines(h_lower, 0, density.shape[1] - 1, colors='red')
+    plt.hlines(h_upper, 0, density.shape[1] - 1, colors='red')
+    plt.vlines(v_lower, 0, density.shape[0] - 1, colors='red')
+    plt.vlines(v_upper, 0, density.shape[0] - 1, colors='red')
+
+    plt.subplot(232), plt.imshow(depth_trimmed), plt.title('trim to edge')
+    plt.subplot(233), plt.imshow(depth_padded), plt.title('pad to square')
+    plt.subplot(234), plt.imshow(depth_normalized), plt.title('normalize depths')
+    plt.subplot(235), plt.imshow(depth_resized), plt.title('resize to 128x128')
+
+
+    # plt.show()
+    # plt.pause(3)
+    # plt.close()
+
+if __name__ == "__main__":
+    run_single_density(sys.argv[1])
 

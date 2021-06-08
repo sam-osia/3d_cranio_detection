@@ -43,12 +43,12 @@ WIDTH = 640
 FILTER_DIST = 350
 
 data_dir = './data'
-raw_data_dir = os.path.join(data_dir, 'raw')
-processed_data_dir = os.path.join(data_dir, 'processed')
+raw_data_dir = os.path.join(data_dir, 'raw', 'android_data')
+processed_data_dir = os.path.join(data_dir, 'raw', 'rgbd')
 data_files = os.listdir(raw_data_dir)
 
 for run_folder in data_files:
-    if run_folder != 's_1_top':
+    if run_folder != 's_run_t_3':
         continue
 
     depth_raw = []
